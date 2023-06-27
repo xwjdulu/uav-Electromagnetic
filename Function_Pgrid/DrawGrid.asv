@@ -1,0 +1,31 @@
+%%显示网格及航点，信息素衰减
+function [Run_Grid_set, Run_Virtual_set] = DrawGrid(UAV, Run_Grid_set, Run_Virtual_set, Grid_set, Virtual_set, px, py, g, k, vk)
+for p = 1:1:k
+    if Run_Grid_set(p,3)~=1
+        Run_Grid_set(p,3) = Run_Grid_set(p,3)+g;
+        if Run_Grid_set(p,3)>=0.9
+            Run_Grid_set(p,3) = 0.9;
+        end
+    end
+    plot(px+Run_Grid_set(p,1),py+Run_Grid_set(p,2),'k','linewidth',0.01); %画出网格
+    fill(px+Run_Grid_set(p,1),py+Run_Grid_set(p,2),[0.75,0.75,0.75],'facealpha',Run_Grid_set(p,3));
+%         fill(px+Run_Grid_set(p,1),py+Run_Grid_set(p,2),[0.6,0.8,1],'facealpha',Run_Grid_set(p,3));
+    hold on; 
+end
+plot(Grid_set(:,1),Grid_set(:,2),'.','markersize',1);hold on; %画出网格中心点
+plot(Virtual_set(:,1),Virtual_set(:,2),'+','markersize',5);hold on; %画出虚拟航点
+hold on;
+
+%平均网格息素
+for q = 1:1:vk
+    P = 0;
+    for p = 1:1:k
+        if sqrt(sum(Run_Grid_set(p,1:2) - (Run_Virtual_set(q,1:2)).^2,2)) < 3*UAV(1).R/2      %大场景3*UAV(1).R/2，小场景UAV(1).R
+            P = P + 1;
+            Run_Virtual_set(q,3) = Run_Virtual_set(q,3) + Run_Grid_set(p,3);
+            Run_Virtual_set(q,3) = (Run_Virtual_set(q,3))/P;
+        end
+    end
+end
+
+end
